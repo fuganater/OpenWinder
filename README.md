@@ -1,6 +1,6 @@
 # Open Watch Winder
 
-This code allows you to control a stepper motor with a momentary switch button.
+This allows you to control the rotation cycle pattern of a stepper motor with a momentary switch button. Or: wind you automatic watch.
 
 ## Using the Winder
 On powerup, the LED will fade on and the winder will be in standby, waiting for a button press.
@@ -31,3 +31,7 @@ configured amount of minutes (`PAUSE_MIN`), and eventually restart the cycles. T
 ## Wiring Diagram
 
 <a href="https://git.faked.org/jan/openwatchwinder/raw/master/wiring.png"><img src="https://git.faked.org/jan/openwatchwinder/raw/master/wiring.png" alt="Wiring Diagram"  width="500"/></a>
+
+## Credits
+* Philipp Klimek for his [Gyrocope Watch Winder](https://www.thingiverse.com/thing:3520031)
+* [Peter D.](https://www.thingiverse.com/Dilbert0815/about) for the [initial version](https://www.thingiverse.com/thing:2763503/comments/#comment-2067423) of the code
