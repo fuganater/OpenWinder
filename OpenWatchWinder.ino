@@ -1,22 +1,25 @@
+// Configuration
+#define CYCLES 1
+#define ROT_R 2
+#define ROT_L 2
+#define PAUSE_MIN 2
+
+// Pins
+#define LED_PIN 5
+#define SW_PIN 4
+
+// Motor
+#define ROT_SPEED 1000
+#define ROT_ACCEL 800
+#define ROT_PAUSE 4000
+#define ROT_STEPS 4096
+
 #include <jled.h>
 #include <AccelStepper.h>
 #include <MultiStepper.h>
 #include <AceButton.h>
 
 using namespace ace_button;
-
-#define CYCLES 1
-#define ROT_R 2
-#define ROT_L 2
-#define ROT_STEPS 4096
-#define ROT_SPEED 1000
-#define ROT_ACCEL 800
-#define ROT_PAUSE 4000
-
-#define PAUSE_MIN 2
-
-#define LED_PIN 5
-#define SW_PIN 4
 
 enum StateType
 {
