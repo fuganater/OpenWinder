@@ -1,6 +1,6 @@
 # Open Watch Winder
 
-This allows you to control the rotation cycle pattern of a stepper motor with a momentary switch button. Or: wind you automatic watch.
+This allows you to control the cycles of a stepper motor with a momentary switch button to wind your automatic watch, using the 3D printed [Gyrocope Watch Winder](https://www.thingiverse.com/thing:3520031).
 
 ## Using the Winder
 On powerup, the LED will fade on and the winder will be in standby, waiting for a button press.
