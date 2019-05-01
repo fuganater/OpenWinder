@@ -187,7 +187,8 @@ void loop()
     else if ((!last_min) && (temp > (delta * long(PAUSE_MIN - 1)))) // ms per minute
     {
       Serial.println("Last Minute ...");
-      if (Continue) {
+      if (Continue)
+      {
         pwr_led.Breathe(1000).Forever();
       }
       last_min = true;
