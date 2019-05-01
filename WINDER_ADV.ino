@@ -234,6 +234,7 @@ void handleSwEvent(AceButton *button, uint8_t eventType,
     {
     case W_LEFT:
     case W_RIGHT:
+    case W_PAUSE:
       Serial.println(">>Stop Winding<<");
       StopWind = true;
       Continue = false;
@@ -248,6 +249,7 @@ void handleSwEvent(AceButton *button, uint8_t eventType,
     Serial.println("SW CLICK");
     pwr_led.Reset();
     Continue = true;
+    StopWind = false;
     switch (WState)
     {
     case W_IDLE:
