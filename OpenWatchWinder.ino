@@ -5,7 +5,7 @@
 
 using namespace ace_button;
 
-#define ROTATIONS 1
+#define CYCLES 1
 #define ROT_R 2
 #define ROT_L 2
 #define ROT_STEPS 4096
@@ -37,7 +37,7 @@ AceButton pwr_sw(SW_PIN);
 int TargetPos = 0;
 long StartTime = 0;
 
-int Rotations = ROTATIONS;
+int Rotations = CYCLES;
 StateType WState = W_INIT;
 int Restart = false;
 int Continue = false;
@@ -84,7 +84,7 @@ void loop()
     }
     StartTime = millis();
     winder.enableOutputs();
-    Rotations = ROTATIONS;
+    Rotations = CYCLES;
     break;
 
   case W_CYCLE:
