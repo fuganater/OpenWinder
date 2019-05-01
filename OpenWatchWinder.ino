@@ -63,12 +63,13 @@ void setup()
   winder.setMaxSpeed(ROT_SPEED);
   winder.setAcceleration(ROT_ACCEL);
   WState = W_IDLE;
+
+  Serial.println(">>Winder Ready<<");
 }
 
 void loop()
 {
   StateType old_state = WState;
-  static long act_sec = 0;
 
   pwr_sw.check();
   pwr_led.Update();
@@ -161,6 +162,11 @@ void loop()
     if (Continue)
     {
       pwr_led.Breathe(5000).Forever();
+      Serial.println(">>Winder Stopped, will continue<<");
+    }
+    else
+    {
+      Serial.println(">>Winder Stopped, will not continue<<");
     }
     break; // case W_STOP
 
@@ -168,7 +174,6 @@ void loop()
   {
     long temp = millis() - StartTime;
     long delta = 60L * 1000L;
-    static long old_sec;
     static int last_min = false;
 
     if (Restart)
@@ -192,15 +197,6 @@ void loop()
         pwr_led.Breathe(1000).Forever();
       }
       last_min = true;
-    }
-    else
-    {
-      act_sec = millis() / 1000;
-      if (act_sec != old_sec)
-      {
-        Serial.println(act_sec);
-        old_sec = act_sec;
-      }
     }
   }
   break; // W_PAUSE
@@ -267,10 +263,10 @@ void handleSwEvent(AceButton *button, uint8_t eventType,
     break;
 
   default:
-    Serial.print("SW: ");
-    Serial.print(eventType);
-    Serial.print(", ");
-    Serial.println(buttonState);
+    //Serial.print("SW: ");
+    //Serial.print(eventType);
+    //Serial.print(", ");
+    //Serial.println(buttonState);
     break;
   }
 }
