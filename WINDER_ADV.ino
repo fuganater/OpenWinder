@@ -80,7 +80,6 @@ void loop()
     {
       WState = W_CYCLE;
       Restart = false;
-      Continue = false;
     }
     StartTime = millis();
     winder.enableOutputs();
@@ -159,7 +158,10 @@ void loop()
     winder.disableOutputs();
     StartTime = millis();
     WState = W_PAUSE;
-    pwr_led.Breathe(5000).Forever();
+    if (Continue)
+    {
+      pwr_led.Breathe(5000).Forever();
+    }
     break; // case W_STOP
 
   case W_PAUSE:
@@ -173,10 +175,9 @@ void loop()
     {
       WState = W_IDLE;
     }
-    else if (temp > (delta * long(PAUSE_MIN))) // ms per minute
+    else if (Continue && temp > (delta * long(PAUSE_MIN))) // ms per minute
     {
       WState = W_IDLE;
-      Continue = true;
       last_min = false;
       Serial.print("d_time : ");
       Serial.print(temp);
@@ -186,7 +187,9 @@ void loop()
     else if ((!last_min) && (temp > (delta * long(PAUSE_MIN - 1)))) // ms per minute
     {
       Serial.println("Last Minute ...");
-      pwr_led.Breathe(1000).Forever();
+      if (Continue) {
+        pwr_led.Breathe(1000).Forever();
+      }
       last_min = true;
     }
     else
@@ -233,6 +236,8 @@ void handleSwEvent(AceButton *button, uint8_t eventType,
     case W_RIGHT:
       Serial.println(">>Stop Winding<<");
       StopWind = true;
+      Continue = false;
+      pwr_led.On();
       break;
     default:
       break;
@@ -242,6 +247,7 @@ void handleSwEvent(AceButton *button, uint8_t eventType,
   case AceButton::kEventClicked:
     Serial.println("SW CLICK");
     pwr_led.Reset();
+    Continue = true;
     switch (WState)
     {
     case W_IDLE:
