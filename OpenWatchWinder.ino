@@ -1,5 +1,5 @@
 // Configuration
-#define CYCLES 1
+#define CYCLES 2
 #define ROT_R 2
 #define ROT_L 2
 #define PAUSE_MIN 2
@@ -23,51 +23,49 @@ using namespace ace_button;
 
 enum StateType
 {
-  W_INIT,  // 0
-  W_SETUP, // 1
-  W_IDLE,  // 2
-  W_CYCLE, // 3
-  W_LEFT,  // 4
-  W_RIGHT, // 5
-  W_STOP,  // 6
-  W_PAUSE  // 7
+  W_IDLE,  // 0
+  W_CYCLE, // 1
+  W_RIGHT, // 2
+  W_LEFT,  // 3
+  W_STOP,  // 4
+  W_PAUSE  // 5
 };
 
 AccelStepper winder(8, 8, 10, 9, 11, false);
 JLed pwr_led = JLed(LED_PIN).FadeOn(1000);
 AceButton pwr_sw(SW_PIN);
 
+StateType WState = W_IDLE;
+int Rotations = CYCLES;
+int Start = false;
+int Continue = false;
+int Stop = false;
+int LedOn = true;
+int LastMinute = false;
 int TargetPos = 0;
 long StartTime = 0;
-
-int Rotations = CYCLES;
-StateType WState = W_INIT;
-int Restart = false;
-int Continue = false;
-int StopWind = false;
-int WaitMin = PAUSE_MIN;
 
 void handleSwEvent(AceButton *, uint8_t, uint8_t);
 
 void setup()
 {
-  ButtonConfig *buttonConfig = pwr_sw.getButtonConfig();
-
-  WState = W_SETUP;
-  Serial.begin(9600);
+  Serial.begin(115200);
   pinMode(SW_PIN, INPUT_PULLUP);
 
+  ButtonConfig *buttonConfig = pwr_sw.getButtonConfig();
   buttonConfig->setEventHandler(handleSwEvent);
-  buttonConfig->setFeature(ButtonConfig::kFeatureClick);
+  buttonConfig->setFeature(ButtonConfig::kFeatureDoubleClick);
   buttonConfig->setFeature(ButtonConfig::kFeatureLongPress);
   buttonConfig->setFeature(ButtonConfig::kFeatureSuppressAfterLongPress);
+  buttonConfig->setFeature(ButtonConfig::kFeatureSuppressAfterDoubleClick);
+  buttonConfig->setFeature(ButtonConfig::kFeatureSuppressClickBeforeDoubleClick);
   buttonConfig->setClickDelay(500);
 
   winder.setMaxSpeed(ROT_SPEED);
   winder.setAcceleration(ROT_ACCEL);
   WState = W_IDLE;
 
-  Serial.println(">>Winder Ready<<");
+  Serial.println("-- Winder: Ready");
 }
 
 void loop()
@@ -75,42 +73,38 @@ void loop()
   StateType old_state = WState;
 
   pwr_sw.check();
-  pwr_led.Update();
 
   switch (WState)
   {
   case W_IDLE:
-    if (Restart || Continue)
+    if (Start || Continue)
     {
+      Start = false;
+      StartTime = millis();
+      winder.enableOutputs();
+      Rotations = CYCLES;
       WState = W_CYCLE;
-      Restart = false;
     }
-    StartTime = millis();
-    winder.enableOutputs();
-    Rotations = CYCLES;
     break;
 
   case W_CYCLE:
-    pwr_led.Blink(1000, 500).Forever();
+    if (LedOn)
+    {
+      pwr_led.Reset();
+      pwr_led.Blink(1000, 200).Forever();
+    }
 
-    if (StopWind)
+    if (Stop)
     {
       WState = W_STOP;
     }
     else if ((Rotations--) > 0)
     {
-      Serial.print("Counter : ");
+      Serial.print("## Cycles until Pause: ");
       Serial.println(Rotations);
-
-#if (ROT_R > 0)
       WState = W_RIGHT;
-      TargetPos -= (ROT_R * ROT_STEPS); //-4096;  // Une rotation complète avec 2048 pas (1 tour environ 4.5sec)
+      TargetPos -= (ROT_R * ROT_STEPS);
       winder.moveTo(TargetPos);
-#elif (ROT_L > 0)
-      WState = W_LEFT;
-      TargetPos += (ROT_R * ROT_STEPS); //-4096;  // Une rotation complète avec 2048 pas (1 tour environ 4.5sec)
-      winder.moveTo(TargetPos);
-#endif
     }
     else
     {
@@ -123,23 +117,16 @@ void loop()
     {
       winder.run();
     }
-    else if (StopWind)
+    else if (Stop)
     {
       WState = W_STOP;
     }
-#if (ROT_L > 0)
     else
     {
       WState = W_LEFT;
-      TargetPos += (ROT_R * ROT_STEPS); //-4096;  // Une rotation complète avec 2048 pas (1 tour environ 4.5sec)
+      TargetPos += (ROT_R * ROT_STEPS);
       winder.moveTo(TargetPos);
     }
-#else
-    else
-    {
-      WState = W_CYCLE;
-    }
-#endif
     break; // case W_RIGHT
 
   case W_LEFT:
@@ -147,7 +134,7 @@ void loop()
     {
       winder.run();
     }
-    else if (StopWind)
+    else if (Stop)
     {
       WState = W_STOP;
     }
@@ -158,54 +145,58 @@ void loop()
     break; // case W_LEFT
 
   case W_STOP:
-    StopWind = false;
+    Stop = false;
     winder.disableOutputs();
     StartTime = millis();
-    WState = W_PAUSE;
     if (Continue)
     {
-      pwr_led.Breathe(5000).Forever();
-      Serial.println(">>Winder Stopped, will continue<<");
+      Serial.println("<< Winder: Stopped, waiting for next cycle");
+      WState = W_PAUSE;
+      if (LedOn)
+      {
+        pwr_led.Reset();
+        pwr_led.Breathe(5000).Forever();
+      }
     }
     else
     {
-      Serial.println(">>Winder Stopped, will not continue<<");
+      Serial.println("<< Winder: Stopped, will not restart");
+      if (LedOn)
+      {
+        pwr_led.Reset();
+        pwr_led.On();
+      }
+      WState = W_IDLE;
     }
     break; // case W_STOP
 
   case W_PAUSE:
-  {
     long temp = millis() - StartTime;
     long delta = 60L * 1000L;
-    static int last_min = false;
 
-    if (Restart)
+    if (Start)
     {
       WState = W_IDLE;
     }
-    else if (Continue && temp > (delta * long(PAUSE_MIN))) // ms per minute
+    // run once, 1 minute before PAUSE_MIN elapses
+    else if ((!LastMinute) && (temp > (delta * long(PAUSE_MIN - 1))))
     {
-      WState = W_IDLE;
-      last_min = false;
-      Serial.print("d_time : ");
-      Serial.print(temp);
-      Serial.print(" > ");
-      Serial.println(delta);
-    }
-    else if ((!last_min) && (temp > (delta * long(PAUSE_MIN - 1)))) // ms per minute
-    {
-      Serial.println("Last Minute ...");
-      if (Continue)
+      Serial.println("<< Winder: Restarting in 1 minute");
+      if (Continue && LedOn)
       {
+        pwr_led.Reset();
         pwr_led.Breathe(1000).Forever();
       }
-      last_min = true;
+      LastMinute = true;
     }
-  }
-  break; // W_PAUSE
+    // PAUSE_MIN has elapsed && Continue
+    else if (Continue && temp > (delta * long(PAUSE_MIN)))
+    {
+      LastMinute = false;
+      WState = W_IDLE;
+    }
+    break; // W_PAUSE
 
-  case W_INIT:
-  case W_SETUP:
   default:
     winder.disableOutputs();
     break;
@@ -214,62 +205,101 @@ void loop()
 
   if (WState != old_state)
   {
-    Serial.print("STATE : ");
+    Serial.print("-- Changing State: ");
     Serial.print(old_state);
-    Serial.print(" >> ");
+    Serial.print(" -> ");
     Serial.println(WState);
   }
 
+  pwr_led.Update();
+
 } // loop
 
-void handleSwEvent(AceButton *button, uint8_t eventType,
-                   uint8_t buttonState)
+void handleSwEvent(AceButton *button, uint8_t eventType, uint8_t buttonState)
 {
   switch (eventType)
   {
+
+  case AceButton::kEventClicked:
+    switch (WState)
+    {
+    case W_IDLE:
+    case W_PAUSE:
+      Serial.println(">> Click: Start Winding");
+      Stop = false;
+      Start = true;
+      Continue = true;
+      WState = W_IDLE;
+      break;
+    default:
+      break;
+    }
+    break;
+
   case AceButton::kEventLongPressed:
-    Serial.println("SW LONG");
-    pwr_led.Reset();
     switch (WState)
     {
     case W_LEFT:
     case W_RIGHT:
     case W_PAUSE:
-      Serial.println(">>Stop Winding<<");
-      StopWind = true;
+      Serial.println(">> LongPress: Stop Winding");
+      pwr_led.Reset();
+      pwr_led.Blink(100, 500).Forever();
+      Stop = true;
       Continue = false;
-      pwr_led.On();
       break;
     default:
       break;
     }
     break;
 
-  case AceButton::kEventClicked:
-    Serial.println("SW CLICK");
+  case AceButton::kEventDoubleClicked:
     pwr_led.Reset();
-    Continue = true;
-    StopWind = false;
-    switch (WState)
+    if (LedOn)
     {
-    case W_IDLE:
-      Serial.println(">>Start Winding<<");
-      WState = W_CYCLE;
-      break;
-    case W_PAUSE:
-      Serial.println(">>Restart Winding<<");
-      Restart = true;
-      break;
-    default:
-      break;
+      Serial.println(">> DoubleClick: LED Disabled");
+      pwr_led.Stop();
+      LedOn = false;
+    }
+    else
+    {
+      Serial.println(">> DoubleClick: LED Enabled");
+      LedOn = true;
+      switch (WState)
+      {
+      case W_IDLE:
+        Serial.println("<< LED: On");
+        pwr_led.On();
+        break;
+
+      case W_PAUSE:
+        if (!LastMinute)
+        {
+          Serial.println("<< LED: Breathe Slow");
+          pwr_led.Breathe(5000).Forever();
+        }
+        else
+        {
+          Serial.println("<< LED: Breathe Fast");
+          pwr_led.Breathe(1000).Forever();
+        }
+        break;
+
+      case W_LEFT:
+      case W_RIGHT:
+        Serial.println("<< LED: Blink");
+        pwr_led.Blink(1000, 200).Forever();
+        break;
+
+      default:
+        Serial.println("<< LED: WTF?");
+        pwr_led.Blink(50, 50).Forever();
+        break;
+      }
     }
     break;
 
   default:
-    //Serial.print("SW: ");
-    //Serial.print(eventType);
-    //Serial.print(", ");
-    //Serial.println(buttonState);
     break;
   }
 }

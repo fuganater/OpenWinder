@@ -5,28 +5,32 @@ This allows you to control the cycles of a stepper motor with a momentary switch
 ## Using the Winder
 On powerup, the LED will fade on and the winder will be in standby, waiting for a button press.
 
-The button knows two types of inputs:
-* **press**, which is input shorter than 500ms
+The button knows three types of inputs:
+* **click**, which is input shorter than 500ms
 * **long-press**, which is input longer than 500ms
+* **double-click**
 
 The winder works in cycles, which means it will do the configured number of cycles (`CYCLES`), with each cycle consisting of a configured number of rotations in each direction (`ROT_R`, `ROT_L`), then wait for the
 configured amount of minutes (`PAUSE_MIN`), and eventually restart the cycles. This will be refered to as "_winding_".
 
 ### The very short version of a manual:
-* press the button to start winding
+* click the button to start winding
 * long-press the button to stop winding
+* double-click to toggle the LED (on/off)
 
-### Switching Modes (a.k.a the slightly longer version of a manual)
-* When pressing the button while the winder is in standby, it will start winding.
+### Switching States (a.k.a the slightly longer version of a manual)
+* When clicking the button while the winder is in standby, it will start winding.
 * When long-pressing the button while it is winding, it will return to the home position and stop winding.
 * When long-pressing the button while it is waiting for the next cycle, it will stop winding.
-* When pressing the buttong while it is waiting for the next cycle, it will start winding again immediately.
+* When clicking the button while it is waiting for the next cycle, it will start winding again immediately.
+* When double-clicking the button in any state, the LED will turn off if it was on, or on (in the appropriate status mode) if it was off.
 
 ## LED Status
-* **Solid**: Standby
-* **Blinking** (1s on, 0.5s off): Winding
-* **Slow Breathing**: Waiting for next cycles
-* **Fast Breathing**: Next cycle will start in <1 minute
+* **Solid**: Standby / Manually Stopped
+* **Slow Blinking** (1s on, 0.2s off): Winding
+* **Fast Blinking** (0.1 on, 0.5s off): Stopping, returning to home position (when manually stopped)
+* **Slow Breathing**: Paused, waiting for next cycles
+* **Fast Breathing**: Paused, the next cycle will start in <1 minute
 
 ## Wiring Diagram
 
