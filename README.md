@@ -27,8 +27,8 @@ configured amount of minutes (`PAUSE_MIN`), and eventually restart the cycles. T
 
 ## LED Status
 * **Solid**: Standby / Manually Stopped
-* **Slow Blinking** (1s on, 0.2s off): Winding
-* **Fast Blinking** (0.1 on, 0.5s off): Stopping, returning to home position (when manually stopped)
+* **Long Blinking** (1s on, 0.2s off): Winding
+* **Short Blinking** (0.1 on, 0.5s off): Stopping, returning to home position (when manually stopped)
 * **Slow Breathing**: Paused, waiting for next cycles
 * **Fast Breathing**: Paused, the next cycle will start in <1 minute
 

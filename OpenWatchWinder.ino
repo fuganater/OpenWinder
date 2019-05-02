@@ -243,10 +243,13 @@ void handleSwEvent(AceButton *button, uint8_t eventType, uint8_t buttonState)
     case W_RIGHT:
     case W_PAUSE:
       Serial.println(">> LongPress: Stop Winding");
-      pwr_led.Reset();
-      pwr_led.Blink(100, 500).Forever();
       Stop = true;
       Continue = false;
+      if (WState != W_PAUSE)
+      {
+        pwr_led.Reset();
+        pwr_led.Blink(100, 500).Forever();
+      }
       break;
     default:
       break;
