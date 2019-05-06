@@ -25,6 +25,50 @@ configured amount of minutes (`PAUSE_MIN`), and eventually restart the cycles. T
 * When clicking the button while it is waiting for the next cycle, it will start winding again immediately.
 * When double-clicking the button in any state, the LED will turn off if it was on, or on (in the appropriate status mode) if it was off.
 
+## Configuration
+I have no special knowledge about automatic watches, but i read that these watches require between 650 and 950 turns per day (TPD) to keep going.
+To find the right number of rotations, cycles and minutes to pause, we need to do a bit of calculation:
+
+* 1 cycle = 20 turns (2 * 5 turns in each direction)
+* 800 TPD / 20 turns per cycle = 40 cycles per day
+
+Alright, so 40 cycles will be required. But how long would it take to get 40 cycles?
+
+* 1 turn = 4.5 seconds
+* 20 turns = 90 seconds
+* 40 cycles = 3600 seconds (1 hour)
+
+That means 800 TPD would be achieved in 1 hour of non-stop rotation, but that could possibly harm your watch if you leave it on there the whole day. Or so i heard...
+
+So we need to find the appropriate time to pause between cycles, to spread those 800 TPD over the whole 24 hours:
+
+* 1 day = 1440 minutes
+* 1440 minutes / 40 cycles = 36 minutes in total, for a cycle including the pause between cycles
+* 36 minutes total - 90 seconds cycle = 34.5 minutes pause
+
+Now let's round this up to **35 minutes of pausing** between cycles, as i think a watch that's only "nearly completely wound all the time" is better than a watch that's "nearly broken soon".
+
+To confirm our calculation, let's see how close we got to 800 TPD:
+
+* (35 + 1.5) * 40 cycles = 1460 minutes 
+* 1440 / 1460 minutes * 800 TPD = 789 TPD (or: 0.9863%)
+
+If your watch requires more or fewer TPD, i would suggest adjusting the pause between cycles first:
+
+* for 650 TPD: 
+  * 650 / 20 turns = 32.5 cycles
+  * 1440 minutes / 32.5 cycles = 44 minutes total
+  * 44 - 1.5 = 42.5 -> **43 minutes of pause**
+  * 1440 / (43 + 1.5) * 32.5 * 650 = **~647 TPD**
+* for 950 TPD:
+  * 950 / 20 turns = 47.5 cycles
+  * 1440 minutes / 47.5 cycles = ~30 minutes total
+  * 30 - 1.5 = 28.5 -> **29 minutes of pause**
+  * 1440 / (29 + 1.5) * 47.5 * 950 = **~944TPD**
+
+Please bear in mind that those are theoretical numbers, and that the actual values will depend on
+how long a rotation takes on your build. I take no responsibility for any damage whatsoever! ;-)
+
 ## LED Status
 * **Solid**: Standby / Manually Stopped
 * **Long Blinking** (1s on, 0.2s off): Winding
@@ -57,6 +101,10 @@ configured amount of minutes (`PAUSE_MIN`), and eventually restart the cycles. T
   * Arduino -> Driver board 
   * Arduino -> Button + LED
   * Terminal Block -> Arduino & Driver board (split strands into 2x 5V/GND)
+
+## ToDo
+* Allow stopping immediately, not only after current rotations are done
+* Convert to an ESP8266 to make it easily controlable and configurable via a web-interface
 
 ## Credits
 * Philipp Klimek for his [Gyrocope Watch Winder](https://www.thingiverse.com/thing:3520031)
