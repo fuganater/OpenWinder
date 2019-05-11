@@ -1,7 +1,7 @@
 // Configuration
-#define CYCLES 2
-#define ROT_R 5
-#define ROT_L 5
+#define CYCLES 5
+#define ROT_R 2
+#define ROT_L 2
 #define PAUSE_MIN 35
 
 // Pins
@@ -65,7 +65,7 @@ void setup()
   winder.setAcceleration(ROT_ACCEL);
   WState = W_IDLE;
 
-  Serial.println("-- Winder: Ready");
+  Serial.println("<< Winder: Ready");
 }
 
 void loop()

@@ -29,7 +29,7 @@ configured amount of minutes (`PAUSE_MIN`), and eventually restart the cycles. T
 I have no special knowledge about automatic watches, but i read that these watches require between 650 and 950 turns per day (TPD) to keep going.
 To find the right number of rotations, cycles and minutes to pause, we need to do a bit of calculation:
 
-* 1 cycle = 20 turns (2 * 5 turns in each direction)
+* 1 cycle = 20 turns (5 * 2 turns in each direction)
 * 800 TPD / 20 turns per cycle = 40 cycles per day
 
 Alright, so 40 cycles will be required. But how long would it take to get 40 cycles?
@@ -51,7 +51,7 @@ Now let's round this up to **35 minutes of pausing** between cycles, as i think 
 To confirm our calculation, let's see how close we got to 800 TPD:
 
 * (35 + 1.5) * 40 cycles = 1460 minutes 
-* 1440 / 1460 minutes * 800 TPD = 789 TPD (or: 0.9863%)
+* 1440 / 1460 minutes * 800 TPD = **789 TPD** (or: 0.9863%)
 
 If your watch requires more or fewer TPD, i would suggest adjusting the pause between cycles first:
 
@@ -64,7 +64,7 @@ If your watch requires more or fewer TPD, i would suggest adjusting the pause be
   * 950 / 20 turns = 47.5 cycles
   * 1440 minutes / 47.5 cycles = ~30 minutes total
   * 30 - 1.5 = 28.5 -> **29 minutes of pause**
-  * 1440 / (29 + 1.5) * 47.5 * 950 = **~944TPD**
+  * 1440 / (29 + 1.5) * 47.5 * 950 = **~944 TPD**
 
 Please bear in mind that those are theoretical numbers, and that the actual values will depend on
 how long a rotation takes on your build. I take no responsibility for any damage whatsoever! ;-)
