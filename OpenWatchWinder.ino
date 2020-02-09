@@ -124,7 +124,7 @@ void loop()
     else
     {
       WState = W_LEFT;
-      TargetPos += (ROT_R * ROT_STEPS);
+      TargetPos += (ROT_L * ROT_STEPS);
       winder.moveTo(TargetPos);
     }
     break; // case W_RIGHT
