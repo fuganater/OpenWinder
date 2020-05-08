@@ -79,6 +79,7 @@ how long a rotation takes on your build. I take no responsibility for any damage
 ## Wiring Diagram
 
 <a href="https://git.faked.org/jan/openwatchwinder/raw/master/wiring.png"><img src="https://git.faked.org/jan/openwatchwinder/raw/master/wiring.png" alt="Wiring Diagram"  width="500"/></a>
+*Note* Alternativly to the DC jack you could cut a USB cable and attach it direclty to the Nano.
 
 ## Bill of Materials
 * [Arduino Nano v3.0](https://amzn.to/2WuV7lG)
