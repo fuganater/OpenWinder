@@ -1,8 +1,8 @@
 // Configuration
 #define CYCLES 5
-#define ROT_R 2
-#define ROT_L 2
-#define PAUSE_MIN 35
+#define ROT_R 5  //default 2
+#define ROT_L 5  //default 2
+#define PAUSE_MIN 30  //default 35
 
 // Pins
 #define LED_PIN 5
